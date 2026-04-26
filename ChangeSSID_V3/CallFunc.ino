@@ -14,7 +14,7 @@ void CallWeather(void) {
   else if (wi.WiFiAreaCode == AREA_CODE_ASAN_TANGJUNG_MYUN) { latlon = "latitude=36.804&longitude=127.065"; }
   else if (wi.WiFiAreaCode == AREA_CODE_CHUNGLA) { latlon = "latitude=37.526&longitude=126.634"; }
   else if (wi.WiFiAreaCode == AREA_CODE_OSAN) { latlon = "latitude=37.143&longitude=127.073"; }
-  else if (wi.WiFiAreaCode == AREA_CODE_GODEOK) { latlon = "latitude=37.051&longitude=127.053"; } 
+  else if (wi.WiFiAreaCode == AREA_CODE_GODEOK) { latlon = "latitude=37.055&longitude=127.045"; } 
   else { latlon = "latitude=37.525&longitude=126.722"; }
 
   // 2. HTTPS 대신 HTTP 사용 (속도 향상 및 메모리 확보)
@@ -97,7 +97,7 @@ void CallDust(void) {
   else if (wi.WiFiAreaCode == AREA_CODE_ASAN_TANGJUNG_MYUN) { latlon = "latitude=36.804&longitude=127.065"; }
   else if (wi.WiFiAreaCode == AREA_CODE_CHUNGLA) { latlon = "latitude=37.526&longitude=126.634"; }
   else if (wi.WiFiAreaCode == AREA_CODE_OSAN) { latlon = "latitude=37.143&longitude=127.073"; }
-  else if (wi.WiFiAreaCode == AREA_CODE_GODEOK) { latlon = "latitude=37.051&longitude=127.053"; } 
+  else if (wi.WiFiAreaCode == AREA_CODE_GODEOK) { latlon = "latitude=37.055&longitude=127.045"; } 
   else { latlon = "latitude=37.525&longitude=126.722"; }
 
   String url = "http://air-quality-api.open-meteo.com/v1/air-quality?" + latlon + "&current=pm10,pm2_5&timezone=Asia%2FSeoul";

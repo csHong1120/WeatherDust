@@ -1,5 +1,5 @@
-#include <ESP8266HTTPClient.h>
-#include <ArduinoJson.h>
+#include "define.h"
+
 
 void CallWeather(void) {
   // 1. 메모리 부족을 방지하기 위해 Secure 대신 일반 WiFiClient 사용

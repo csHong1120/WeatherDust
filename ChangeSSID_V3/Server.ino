@@ -1,3 +1,4 @@
+#include "define.h"
 
 void ResetCommand(void)
 {
@@ -59,43 +60,130 @@ void createWebServer(int webtype)
             }
             server.send(statusCode, "application/json", content);
         });
-    } else {
+        } else {
         server.on("/", []() {
-            content  = "<head><title>Clock Setting</title></head>\
-                        <h1 style=color:#FF0000>  ====  Clock Setting  ====  </h1>\
-                        <p>ALARM \
-                        <a href=\"alarmon\"><button>ON</button></a>&nbsp;\
-                        <a href=\"alarmoff\"><button>OFF</button></a></p>\
-                        <p><form method='get' action='alarmset'><label>Alarm Setting : Hour </label><input name='hour' required minlength=1 maxlength=2 size=2><label> Minute </label><input name='min' required minlength=1 maxlength=2 size=2>&nbsp;&nbsp;<input type='submit'></form></p>\
-                        <p><form method='get' action='dotbright'><label>Bright Number(1~15) : Number </label><input name='number' required minlength=1 maxlength=2 size=2>&nbsp;&nbsp;<input type='submit'></form></p>\
-                        <p><form method='get' action='areacode'><label>Area Code : Area </label><input name='area' required minlength=1 maxlength=1 size=1>&nbsp;&nbsp;<input type='submit'></form></p>\
-                        <p style=color:#00ffFF> (0:JAKJ, 1:GONG, 2:JUNG, 3:PAJU, 4:ASAN, 5:CHNG, 6:OSAN, 7:GODEOK) </p>\
-                        <p>TIME SIGNAL \
-                        <a href=\"timesigon\"><button>ON</button></a>&nbsp;\
-                        <a href=\"timesigoff\"><button>OFF</button></a></p>\
-                        <p>MEMORY \
-                        <a href=\"cleareeprom\"><button>CLEAR</button></a></p>";
+            content = R"=====(
+                <!DOCTYPE html>
+                <html lang="ko">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>시계 설정 페이지</title>
+                    <style>
+                        body { font-family: 'Malgun Gothic', sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; }
+                        .container { background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 25px; width: 100%; max-width: 400px; }
+                        h1 { color: #1a73e8; text-align: center; font-size: 22px; margin-bottom: 20px; border-bottom: 2px solid #e8eaed; padding-bottom: 10px; }
+                        .section { margin-bottom: 20px; padding: 15px; border: 1px solid #eee; border-radius: 8px; }
+                        h2 { font-size: 15px; color: #5f6368; margin: 0 0 12px 0; border-left: 4px solid #1a73e8; padding-left: 8px; }
+                        .btn-group { display: flex; gap: 8px; margin-bottom: 10px; }
+                        button { flex: 1; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s; }
+                        
+                        .btn-on { background-color: #34a853; color: white; }
+                        .btn-off { background-color: #ea4335; color: white; }
+                        .btn-submit { background-color: #1a73e8; color: white; width: 80px; flex: none; }
+                        .btn-clear { background-color: #80868b; color: white; width: 100%; }
+                        
+                        .input-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #f8f9fa; padding: 8px; border-radius: 6px; }
+                        input[type='number'] { padding: 8px; border: 1px solid #dadce0; border-radius: 4px; width: 50px; text-align: center; }
+                        
+                        #toast {
+                            visibility: hidden; min-width: 200px; background-color: #333; color: #fff; text-align: center;
+                            border-radius: 30px; padding: 12px; position: fixed; z-index: 1; left: 50%; bottom: 30px;
+                            transform: translateX(-50%); font-size: 14px; opacity: 0; transition: opacity 0.3s, visibility 0.3s;
+                        }
+                        #toast.show { visibility: visible; opacity: 1; }
+                    </style>
+                </head>
+
+                <body>
+
+                    <div class="container">
+                    <h1>⚙️ 스마트 시계 설정</h1>
+                
+                    <div class="section">
+                        <h2>⏰ 알람 (Alarm)</h2>
+                            <div class="btn-group">
+                                <button class="btn-on" onclick="sendCmd('/alarmon', '알람 켜기 설정 완료')">켜기</button>
+                                <button class="btn-off" onclick="sendCmd('/alarmoff', '알람 끄기 설정 완료')">끄기</button>
+                            </div>
+
+                            <div class="input-row">
+                                <div style="display:flex; align-items:center; gap:5px;">
+                                <input id="alHour" type="number" min="0" max="23" placeholder="시"> :
+                                <input id="alMin" type="number" min="0" max="59" placeholder="분">
+                            </div>
+                            <button class="btn-submit" onclick="setAlarm()">설정</button>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h2>💡 밝기 조절 (1~15)</h2>
+                            <div class="input-row">
+                                <input id="bright" type="number" min="1" max="15" value="8">
+                                <button class="btn-submit" onclick="setBright()">적용</button>
+                            </div>
+                        </div>
+
+                    <div class="section">
+                        <h2>📍 지역 코드 변경</h2>
+                        <div class="input-row">
+                        <input id="area" type="number" min="0" max="7">
+                        <button class="btn-submit" onclick="setArea()">변경</button>
+                        </div>
+                        <div class="note">0:작전 1:공릉 2:정릉 3:파주 4:아산 5:청라 6:오산 7:고덕</div>
+                    </div>
+
+                    <div class="section">
+                        <h2>🔔 매 정각 시보</h2>
+                        <div class="btn-group">
+                        <button class="btn-on" onclick="sendCmd('/timesigon', '시보 켜기 설정 완료')">켜기</button>
+                        <button class="btn-off" onclick="sendCmd('/timesigoff', '시보 끄기 설정 완료')">끄기</button>
+                        </div>
+                    </div>
+
+                    <button class="btn-clear" onclick="sendCmd('/cleareeprom', 'EEPROM 설정 초기화 완료')">💾 설정 초기화</button>
+                        </div>
+
+                    <div id="toast"></div>
+
+                    <script>
+                        function sendCmd(url, msg) {
+                            fetch(url)
+                            .then(response => { showToast(msg); })
+                            .catch(err => { showToast("통신 오류가 발생했습니다."); });
+                        }
+
+                        function setAlarm() {
+                            const h = document.getElementById('alHour').value;
+                            const m = document.getElementById('alMin').value;
+                            if(!h || !m) return showToast("시간을 입력하세요.");
+                            sendCmd(`/alarmset?hour=${h}&min=${m}`, `알람이 ${h}시 ${m}분으로 설정되었습니다.`);
+                        }
+
+                        function setBright() {
+                            const b = document.getElementById('bright').value;
+                            sendCmd(`/dotbright?number=${b}`, `밝기가 ${b}단계로 변경되었습니다.`);
+                        }
+
+                        function setArea() {
+                            const a = document.getElementById('area').value;
+                            sendCmd(`/areacode?area=${a}`, `지역 코드가 ${a}번으로 변경되었습니다.`);
+                        }
+
+                        function showToast(message) {
+                            const toast = document.getElementById("toast");
+                            toast.innerText = message;
+                            toast.classList.add("show");
+                            setTimeout(() => { toast.classList.remove("show"); }, 2500);
+                        }
+                    </script>
+                </body>
+                </html>
+            )=====";
 
             server.send(200, "text/html", content);
         });
 
-#if 0
-            content  = "<head><title>Clock Setting</title></head>\
-                        <h1>Wifi Webserver(Clock Setting)</h1>\
-                        <p>ALARM \
-                        <a href=\"alarmon\"><button>ON</button></a>&nbsp;\
-                        <a href=\"alarmoff\"><button>OFF</button></a></p>\
-                        <p><form method='get' action='alarmset'><label>Alarm Setting : Hour </label><input name='hour' length=2><label> Minute </label><input name='min' length=2><input type='submit'></form></p>\
-                        <p><form method='get' action='dotbright'><label>Bright Number(1~15) : Number </label><input name='number' length=2><input type='submit'></form></p>\
-                        <p><form method='get' action='areacode'><label>Area Code : Area </label><input name='area' length=1><input type='submit'></form></p>\
-                        <p>TIME SIGNAL \
-                        <a href=\"timesigon\"><button>ON</button></a>&nbsp;\
-                        <a href=\"timesigoff\"><button>OFF</button></a></p>\
-                        <p>MEMORY \
-                        <a href=\"cleareeprom\"><button>CLEAR</button></a></p>";
-#endif
-
-        
         server.on("/cleareeprom", []() {
             content = "<!DOCTYPE HTML>\r\n<html>";
             content += "<p>Clearing the EEPROM</p></html>";

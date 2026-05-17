@@ -11,6 +11,7 @@
     #include <sys/time.h>   // struct timeval
     #include <coredecls.h>  // settimeofday_cb()
 
+    #define VERSION             100001      // 1.00.001  
     #define OK                  1
     #define NG                  0
 
